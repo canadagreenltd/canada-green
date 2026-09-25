@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Canada Green
 
-## Getting Started
+Crowdfunding platform for EV charging infrastructure and agriculture investment projects in Canada.
 
-First, run the development server:
+## Stack
+
+- **Next.js 15** (App Router) + TypeScript + Tailwind CSS v4
+- **Supabase** (Postgres, Auth, Storage) via `@supabase/supabase-js` and `@supabase/ssr`
+- **shadcn/ui** (Radix / Base UI) + **lucide-react**
+- **react-hook-form** + **zod** for forms
+- Deploy target: **Vercel**
+
+## Getting started
 
 ```bash
+# Install dependencies
+npm install
+
+# Copy env template and fill in Supabase keys
+cp .env.local.example .env.local
+
+# Run the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.local.example` to `.env.local` and set:
 
-## Learn More
+| Variable | Description |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key (server-only; never expose to the client) |
+| `NEXT_PUBLIC_SITE_URL` | Public site URL (e.g. `http://localhost:3000`) |
 
-To learn more about Next.js, take a look at the following resources:
+## Folder structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+  app/
+    (public)/          → Marketing site (no auth)
+    (auth)/            → Login, signup, password reset
+    (dashboard)/       → Logged-in user area
+    (admin)/           → Admin-only area
+    api/               → Route handlers (minimal; prefer Server Actions)
+    layout.tsx         → Root layout
+    globals.css
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+  components/
+    ui/                → shadcn/ui components
+    public/            → Marketing-only components
+    dashboard/         → User dashboard components
+    admin/             → Admin dashboard components
+    shared/            → Cross-area components (logo, badges, etc.)
 
-## Deploy on Vercel
+  lib/
+    supabase/          → Browser, server, and middleware clients
+    validations/       → Zod schemas
+    utils.ts           → cn() and helpers
+    constants.ts       → Sectors, payment statuses, roles
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+  actions/             → Server Actions by domain (auth, projects, payments, admin)
+  types/               → Shared + Supabase-generated types
+  middleware.ts        → Session refresh + (later) route protection
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Route groups `(public)`, `(auth)`, `(dashboard)`, and `(admin)` organize layouts without changing URLs.
+
+### Key routes
+
+| Area | Paths |
+| --- | --- |
+| Public | `/`, `/ev`, `/agriculture`, `/projects`, `/projects/[id]`, `/about`, `/how-it-works`, `/faq`, `/contact` |
+| Auth | `/login`, `/signup`, `/forgot-password`, `/reset-password` |
+| User | `/dashboard`, `/dashboard/investments`, `/dashboard/payments/new`, `/dashboard/profile` |
+| Admin | `/admin`, `/admin/payments`, `/admin/projects`, `/admin/users` |
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start Next.js with Turbopack |
+| `npm run build` | Production build |
+| `npm run start` | Serve production build |
+| `npm run lint` | Run ESLint |
+
+## Notes
+
+- Auth, Supabase tables, and page content are not implemented yet — this is the project foundation only.
+- shadcn forms use the `field` component (current default) with `react-hook-form` + `zod`.
+- Toasts use **sonner** (`components/ui/sonner.tsx`).
