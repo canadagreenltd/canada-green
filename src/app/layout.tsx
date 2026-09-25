@@ -21,13 +21,26 @@ const caveat = Caveat({
   weight: ["500", "600", "700"],
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+  "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Canada Green",
     template: "%s | Canada Green",
   },
   description:
     "Crowdfunding platform for EV charging infrastructure and agriculture investment projects in Canada.",
+  openGraph: {
+    type: "website",
+    locale: "en_CA",
+    siteName: "Canada Green",
+    title: "Canada Green",
+    description:
+      "Crowdfunding platform for EV charging infrastructure and agriculture investment projects in Canada.",
+  },
 };
 
 export default function RootLayout({

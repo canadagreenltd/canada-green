@@ -25,16 +25,22 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Deploy (Vercel + Hostinger domain)
+
+Step-by-step manual guide: **[DEPLOY.md](./DEPLOY.md)**
+
+Soft launch works **without** Supabase env vars (marketing site + mock data).
+
 ## Environment variables
 
 Copy `.env.local.example` to `.env.local` and set:
 
 | Variable | Description |
 | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key |
+| `NEXT_PUBLIC_SITE_URL` | Public site URL (`http://localhost:3000` locally; `https://yourdomain.com` on Vercel) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL (optional until Auth/DB) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key (optional until Auth/DB) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key (server-only; never expose to the client) |
-| `NEXT_PUBLIC_SITE_URL` | Public site URL (e.g. `http://localhost:3000`) |
 
 ## Folder structure
 
@@ -89,6 +95,7 @@ Route groups `(public)`, `(auth)`, `(dashboard)`, and `(admin)` organize layouts
 
 ## Notes
 
-- Auth, Supabase tables, and page content are not implemented yet — this is the project foundation only.
-- shadcn forms use the `field` component (current default) with `react-hook-form` + `zod`.
+- **Public marketing site** is implemented on mock data and is ready to soft-launch.
+- Auth, dashboard, admin, and Supabase schema are still stubs — see `AGENTS.md`.
+- shadcn forms use the `field` component with `react-hook-form` + `zod`.
 - Toasts use **sonner** (`components/ui/sonner.tsx`).

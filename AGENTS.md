@@ -143,6 +143,14 @@ Middleware no-ops Supabase session refresh if URL/anon key are missing so local 
 - Commit `.env.local` or service-role keys
 - Re-enable FR toggle without i18n
 
+## Deploy
+
+- Soft-launch target: **Vercel** + custom domain DNS at **Hostinger**
+- Manual steps: **`DEPLOY.md`**
+- Production build: `npm run build` (no Turbopack flag — Vercel-compatible)
+- Soft launch does **not** require Supabase env vars
+- Set `NEXT_PUBLIC_SITE_URL` on Vercel to the canonical HTTPS domain
+
 ## Useful commands
 
 ```bash
@@ -156,5 +164,6 @@ node scripts/check-images.mjs      # Unsplash URL health check
 
 ## Related docs
 
-- `README.md` — setup and folder overview (public content note may lag behind reality)
+- `README.md` — setup and folder overview
+- `DEPLOY.md` — Vercel + Hostinger go-live checklist
 - `AUDIT.md` — public-site audit decisions (ticker scroll-away, nav at `lg`, legal stubs, etc.)
