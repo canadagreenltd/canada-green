@@ -1,15 +1,5 @@
-export default async function InvestmentDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+import { redirect } from "next/navigation";
 
-  return (
-    <div>
-      <h1 className="text-2xl font-semibold">
-        Investment {id} — coming soon
-      </h1>
-    </div>
-  );
+export default function DashboardInvestmentDetailRedirect() {
+  redirect("/dashboard");
 }

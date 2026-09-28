@@ -1,7 +1,5 @@
-export default function InvestmentsPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-semibold">Investments — coming soon</h1>
-    </div>
-  );
+import { redirect } from "next/navigation";
+
+export default function DashboardInvestmentsRedirect() {
+  redirect("/dashboard");
 }

@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Mail, MapPin } from "lucide-react";
-import { ContactForm } from "@/components/public/contact-form";
 import { SectionHeading } from "@/components/public/section-heading";
+
+const ContactForm = dynamic(
+  () =>
+    import("@/components/public/contact-form").then((mod) => mod.ContactForm),
+  { ssr: true }
+);
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -27,8 +33,15 @@ export default function ContactPage() {
           <div className="rounded-2xl bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] md:p-8">
             <h2 className="font-heading text-xl font-bold">Send a message</h2>
             <p className="mt-2 text-sm text-neutral-600">
-              This form is front-end only for now — submissions show a toast
-              confirmation.
+              Online form delivery is not wired yet. Use the form to draft your
+              message, then email{" "}
+              <a
+                href="mailto:hello@canadagreen.ca"
+                className="font-medium text-brand-700 hover:underline"
+              >
+                hello@canadagreen.ca
+              </a>
+              .
             </p>
             <div className="mt-6">
               <ContactForm />

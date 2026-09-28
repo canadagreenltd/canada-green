@@ -1,11 +1,27 @@
 import type { MetadataRoute } from "next";
 import { projects } from "@/lib/mock-data/projects";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-    "http://localhost:3000";
+function getSiteUrl(): string {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  if (configured) return configured;
 
+  const isProd =
+    process.env.VERCEL_ENV === "production" ||
+    process.env.NODE_ENV === "production";
+
+  if (isProd) {
+    // Prefer setting NEXT_PUBLIC_SITE_URL on Vercel; fallback avoids localhost in prod XML
+    return "https://canadagreen.ca";
+  }
+
+  return "http://localhost:3000";
+}
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  const siteUrl = getSiteUrl();
+
+  // Legal stubs (/terms, /privacy, /risk-disclosure) stay reachable but are
+  // excluded until counsel-reviewed copy ships.
   const staticRoutes = [
     "",
     "/ev",
@@ -16,9 +32,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/impact",
     "/faq",
     "/contact",
-    "/terms",
-    "/privacy",
-    "/risk-disclosure",
   ].map((path) => ({
     url: `${siteUrl}${path}`,
     lastModified: new Date(),

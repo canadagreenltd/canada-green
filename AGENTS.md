@@ -8,21 +8,21 @@ Guidance for AI coding agents working in this repository.
 
 Deploy target: **Vercel**.
 
-## Current status (as of project review)
+## Current status (as of production readiness)
 
 | Area | Status |
 |------|--------|
-| Public marketing site | **Done** — full UI on mock data |
-| Legal stubs (`/terms`, `/privacy`, `/risk-disclosure`) | Placeholder notices only |
-| Auth pages + `actions/auth.ts` | **Stub** (“coming soon”) |
-| User dashboard + `components/dashboard/` | **Stub** |
-| Admin area + `components/admin/` | **Stub** |
-| Server actions (projects, payments, admin) | **Stub** |
-| Supabase clients / middleware session refresh | Wired; needs env + real schema |
-| Route protection / roles | **Not implemented** |
-| Contact form | Frontend-only (toast; no backend) |
+| Public marketing site | **Done** — mock projects / FAQ / testimonials |
+| Legal stubs (`/terms`, `/privacy`, `/risk-disclosure`) | Placeholder notices only — counsel copy required |
+| Auth (login / signup / forgot / reset) | **Live** via Supabase Auth + `/auth/callback` |
+| User dashboard (overview, billing, team) | **Live** against Supabase |
+| Admin (overview, approvals, support, audit logs) | **Live** against Supabase |
+| Payments + receipts Server Actions | **Live** (`src/actions/payments.ts`) |
+| Admin project CRUD / DB-backed projects | **Not built** (legacy routes redirect) |
+| Route protection / roles | **Live** in middleware (`/dashboard`, `/admin`) |
+| Contact / newsletter / socials | Frontend-only / coming soon — email `hello@canadagreen.ca` |
 
-**Mental model:** polish and extend the public site carefully; the next major work is Supabase Auth + schema, then dashboard/admin + real Server Actions. Do not treat auth/admin/dashboard stubs as finished features.
+**Mental model:** public marketing stays mock-backed until project CRUD ships; Auth, billing, and admin money flows are production features. Do not invent legal text or social URLs.
 
 ## Stack
 
@@ -40,24 +40,26 @@ Deploy target: **Vercel**.
 src/
   app/
     (public)/     → Marketing (no auth) — implemented
-    (auth)/       → Login, signup, password reset — stubs
-    (dashboard)/  → Logged-in user — stubs
-    (admin)/      → Admin-only — stubs
+    (auth)/       → Login, signup, password reset — live
+    (dashboard)/  → Investor dashboard — live
+    (admin)/      → Admin panel — live
     api/          → Prefer Server Actions; keep API minimal
-  actions/        → Domain Server Actions (auth, projects, payments, admin)
+  actions/        → Domain Server Actions (payments live; auth/admin/projects stubs unused)
   components/
     ui/           → shadcn primitives
     public/       → Marketing components
-    dashboard/    → User dashboard (empty)
-    admin/        → Admin UI (empty)
+    dashboard/    → User dashboard
+    admin/        → Admin UI
     shared/       → Logo, ticker, theme, badges, progress, etc.
+    auth/         → Auth forms + logout
   lib/
     supabase/     → client, server, middleware helpers
-    mock-data/    → projects, faq, testimonials (public UI source of truth today)
-    validations/  → Zod schemas (contact exists)
-    constants.ts  → SECTORS, PAYMENT_STATUSES, ROLES
-  types/          → Shared types; database.ts is a placeholder until generated
-  middleware.ts   → Session refresh only
+    mock-data/    → projects, faq, testimonials (public marketing)
+    validations/  → Zod schemas
+    constants.ts  → SECTORS, PAYMENT_STATUSES, ROLES, payment instructions
+    profit.ts     → Active-plan profit (Toronto weekdays)
+  types/          → Shared types; database.ts placeholder until regenerated
+  middleware.ts   → Session refresh + /dashboard + /admin protection
 ```
 
 Route groups organize layouts; URLs stay flat (`/`, `/login`, `/dashboard`, `/admin`, …).
@@ -68,8 +70,8 @@ Route groups organize layouts; URLs stay flat (`/`, `/login`, `/dashboard`, `/ad
 |------|--------|
 | Public | `/`, `/ev`, `/agriculture`, `/projects`, `/projects/[id]`, `/about`, `/how-it-works`, `/impact`, `/faq`, `/contact`, `/terms`, `/privacy`, `/risk-disclosure` |
 | Auth | `/login`, `/signup`, `/forgot-password`, `/reset-password` |
-| User | `/dashboard`, `/dashboard/investments`, `/dashboard/investments/[id]`, `/dashboard/payments/new`, `/dashboard/profile` |
-| Admin | `/admin`, `/admin/payments`, `/admin/projects`, `/admin/projects/new`, `/admin/projects/[id]/edit`, `/admin/users` |
+| User | `/dashboard`, `/dashboard/billing`, `/dashboard/team` |
+| Admin | `/admin`, `/admin/approvals`, `/admin/support`, `/admin/audit-logs` |
 
 ## Conventions (follow these)
 
@@ -86,7 +88,7 @@ Route groups organize layouts; URLs stay flat (`/`, `/login`, `/dashboard`, `/ad
 6. **Domain constants** (sectors, payment statuses, roles) live in `src/lib/constants.ts`.
 7. **Public data:** until Supabase is wired, use `src/lib/mock-data/`. Keep helpers (`getProjectById`, `getProjectsBySector`, `formatCad`, etc.) consistent across pages.
 8. **Images:** use `next/image`. Allowed remotes: Unsplash + `*.supabase.co` (see `next.config.ts`). Run `scripts/check-images.mjs` if changing Unsplash URLs.
-9. **Middleware:** session refresh only today. When adding auth, put redirects/role checks in `middleware.ts` / `lib/supabase/middleware.ts` — do not leave protected routes open.
+9. **Middleware:** session refresh + redirects/role checks in `middleware.ts` / `lib/supabase/middleware.ts`. Protected routes must not stay open in production without Supabase env.
 10. **i18n:** FR toggle is intentionally hidden in `utility-bar.tsx`. Do not re-enable without a real i18n plan.
 11. **Theme:** light only (`ThemeProvider` with `forcedTheme="light"`). Do not introduce a dark marketing theme.
 12. **Env:** never commit secrets. Copy `.env.local.example` → `.env.local`. Never expose `SUPABASE_SERVICE_ROLE_KEY` to the client.
@@ -120,35 +122,48 @@ Route groups organize layouts; URLs stay flat (`/`, `/login`, `/dashboard`, `/ad
 |----------|--------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Required for live Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-only |
-| `NEXT_PUBLIC_SITE_URL` | e.g. `http://localhost:3000` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server/scripts only |
+| `NEXT_PUBLIC_SITE_URL` | e.g. `http://localhost:3000` / production HTTPS |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Required for `db:create-admin` (no script defaults) |
 
-Middleware no-ops Supabase session refresh if URL/anon key are missing so local marketing work still runs.
+Middleware no-ops Supabase session refresh if URL/anon key are missing so local marketing work still runs; in production, missing env redirects protected routes to `/login?error=config`.
 
 ## What to build next (priority)
 
-1. Supabase schema + regenerate `src/types/database.ts`
-2. Auth flows + `actions/auth.ts` + middleware route protection
-3. User dashboard shell + investments/payments/profile against real data
-4. Admin CRUD (projects, payments, users) + corresponding actions
-5. Wire contact (and later newsletter) to a real backend
-6. Real social URLs; project-detail share handlers; counsel-reviewed legal copy; pagination when project count grows
+1. Counsel-reviewed legal copy; real social URLs; contact / newsletter backend
+2. Admin project CRUD + migrate public projects off mock data
+3. Regenerate `src/types/database.ts` from live schema
+4. Custom SMTP for production auth email reliability
+5. Pagination when project count grows; project-detail share handlers
 
 ## Do not
 
 - Rewrite the public marketing site from scratch without a clear request
 - Add purple/glow generic AI aesthetics or a dark theme
 - Put business logic only in client components when a Server Action fits
-- Treat stub pages as production-complete
+- Invent legal text or hardcode credentials in docs/scripts
 - Commit `.env.local` or service-role keys
 - Re-enable FR toggle without i18n
 
+## Supabase foundation
+
+- Clients: `src/lib/supabase/` (`client`, `server`, `middleware`, `env`, `storage`)
+- Auth email callback: `src/app/auth/callback/route.ts`
+- Login / signup / forgot / reset wired; middleware protects `/dashboard` and `/admin`
+- Signups always create `profiles.role = 'user'` (admin is bootstrap-only via `db:create-admin`)
+- Confirm email + password reset use `/auth/callback` (enable Confirm email in Supabase)
+- Payments + receipt storage: migration `003_payments_storage.sql` (`payment_submissions`, `support_tickets`, `receipts` bucket)
+- One-command setup: **`npm run setup:supabase`** (see `SUPABASE_SETUP.md`)
+- Scripts: `scripts/run-migrations.mjs`, `create-admin.mjs`, `configure-auth.mjs`
+- Optional extra buckets: **`supabase/storage-setup.md`**
+
 ## Deploy
 
-- Soft-launch target: **Vercel** + custom domain DNS at **Hostinger**
+- Target: **Vercel** + custom domain DNS at **Hostinger**
 - Manual steps: **`DEPLOY.md`**
-- Production build: `npm run build` (no Turbopack flag — Vercel-compatible)
-- Soft launch does **not** require Supabase env vars
+- Production readiness notes: **`PRODUCTION_READINESS.md`**
+- Production build: `npm run build` (Turbopack)
+- Production **requires** `NEXT_PUBLIC_SITE_URL` + Supabase URL/anon on Vercel
 - Set `NEXT_PUBLIC_SITE_URL` on Vercel to the canonical HTTPS domain
 
 ## Useful commands
@@ -156,6 +171,7 @@ Middleware no-ops Supabase session refresh if URL/anon key are missing so local 
 ```bash
 npm install
 cp .env.local.example .env.local   # then fill values
+npm run setup:supabase
 npm run dev
 npm run build
 npm run lint
@@ -166,4 +182,7 @@ node scripts/check-images.mjs      # Unsplash URL health check
 
 - `README.md` — setup and folder overview
 - `DEPLOY.md` — Vercel + Hostinger go-live checklist
-- `AUDIT.md` — public-site audit decisions (ticker scroll-away, nav at `lg`, legal stubs, etc.)
+- `SUPABASE_SETUP.md` — create project, copy API keys, auth email URLs
+- `PRODUCTION_READINESS.md` — pre-launch review
+- `supabase/storage-setup.md` — storage buckets + RLS SQL
+- `logic.md` — product profit / admin overview rules

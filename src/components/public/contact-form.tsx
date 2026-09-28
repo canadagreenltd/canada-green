@@ -33,9 +33,10 @@ export function ContactForm() {
   });
 
   const onSubmit = async () => {
-    await new Promise((r) => setTimeout(r, 600));
-    toast.success("Message sent", {
-      description: "Thanks for reaching out. We'll get back to you soon.",
+    await new Promise((r) => setTimeout(r, 400));
+    toast.message("Form not connected yet", {
+      description:
+        "Please email hello@canadagreen.ca directly. Online contact delivery is not enabled.",
     });
     reset();
   };
@@ -92,7 +93,7 @@ export function ContactForm() {
       </FieldGroup>
 
       <Button type="submit" variant="primary" size="lg" disabled={isSubmitting}>
-        {isSubmitting ? "Sending…" : "Send Message"}
+        {isSubmitting ? "Working…" : "Send Message"}
       </Button>
     </form>
   );

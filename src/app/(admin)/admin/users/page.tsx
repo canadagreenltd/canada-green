@@ -1,7 +1,6 @@
-export default function AdminUsersPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-semibold">Admin Users — coming soon</h1>
-    </div>
-  );
+import { redirect } from "next/navigation";
+
+/** Users list lives on Overview — keep URL for old bookmarks. */
+export default function AdminUsersRedirectPage() {
+  redirect("/admin");
 }

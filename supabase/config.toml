@@ -1,0 +1,17 @@
+# Canada Green — Supabase local/project config
+# Migrations are applied with `npm run db:migrate` (Node + Postgres),
+# not interactive `supabase db push`, so you don't need CLI login.
+
+project_id = "canada-green"
+
+[api]
+enabled = true
+
+[db]
+port = 54322
+major_version = 15
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/auth/callback"]

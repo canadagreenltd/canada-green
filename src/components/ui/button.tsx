@@ -12,11 +12,11 @@ const buttonVariants = cva(
         primary:
           "rounded-full bg-accent-red text-white hover:bg-accent-red-hover hover:scale-[1.02]",
         secondary:
-          "rounded-full bg-brand-700 text-white hover:bg-brand-500 hover:scale-[1.02]",
+          "rounded-full bg-brand-700 text-white shadow-md shadow-brand-700/20 hover:bg-brand-500 hover:scale-[1.02]",
         "outline-light":
           "rounded-full border border-white/60 bg-transparent text-white hover:bg-white hover:text-brand-900",
         outline:
-          "rounded-lg border-neutral-200 bg-white text-neutral-900 hover:bg-neutral-cream",
+          "rounded-xl border-brand-300/35 bg-white/80 text-brand-900 hover:bg-moss-100",
         ghost:
           "rounded-lg text-brand-700 hover:bg-brand-50 hover:underline group",
         link: "rounded-none text-brand-700 font-semibold underline-offset-4 hover:underline",

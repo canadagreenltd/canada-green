@@ -6,7 +6,7 @@ Crowdfunding platform for EV charging infrastructure and agriculture investment 
 
 - **Next.js 15** (App Router) + TypeScript + Tailwind CSS v4
 - **Supabase** (Postgres, Auth, Storage) via `@supabase/supabase-js` and `@supabase/ssr`
-- **shadcn/ui** (Radix / Base UI) + **lucide-react**
+- **shadcn/ui** (Base UI) + **lucide-react**
 - **react-hook-form** + **zod** for forms
 - Deploy target: **Vercel**
 
@@ -16,8 +16,11 @@ Crowdfunding platform for EV charging infrastructure and agriculture investment 
 # Install dependencies
 npm install
 
-# Copy env template and fill in Supabase keys
+# Copy env template and fill in Supabase keys (+ ADMIN_EMAIL / ADMIN_PASSWORD for setup)
 cp .env.local.example .env.local
+
+# After creating a Supabase project and filling .env.local:
+npm run setup:supabase
 
 # Run the development server
 npm run dev
@@ -25,22 +28,21 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Deploy (Vercel + Hostinger domain)
-
-Step-by-step manual guide: **[DEPLOY.md](./DEPLOY.md)**
-
-Soft launch works **without** Supabase env vars (marketing site + mock data).
+Setup details: **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)**  
+Deploy (Vercel + Hostinger): **[DEPLOY.md](./DEPLOY.md)**  
+Pre-launch review: **[PRODUCTION_READINESS.md](./PRODUCTION_READINESS.md)**
 
 ## Environment variables
-
-Copy `.env.local.example` to `.env.local` and set:
 
 | Variable | Description |
 | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Public site URL (`http://localhost:3000` locally; `https://yourdomain.com` on Vercel) |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL (optional until Auth/DB) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key (optional until Auth/DB) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key (server-only; never expose to the client) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key (server/scripts only; never expose to the client) |
+| `SUPABASE_DB_URL` | Postgres URI for migrations (local setup scripts) |
+| `SUPABASE_ACCESS_TOKEN` | Management API token for auth config automation |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Bootstrap admin for `npm run db:create-admin` |
 
 ## Folder structure
 
@@ -49,9 +51,9 @@ src/
   app/
     (public)/          → Marketing site (no auth)
     (auth)/            → Login, signup, password reset
-    (dashboard)/       → Logged-in user area
+    (dashboard)/       → Logged-in investor area
     (admin)/           → Admin-only area
-    api/               → Route handlers (minimal; prefer Server Actions)
+    auth/callback/     → Supabase email confirm / recovery callback
     layout.tsx         → Root layout
     globals.css
 
@@ -61,28 +63,31 @@ src/
     dashboard/         → User dashboard components
     admin/             → Admin dashboard components
     shared/            → Cross-area components (logo, badges, etc.)
+    auth/              → Auth forms + logout
 
   lib/
     supabase/          → Browser, server, and middleware clients
+    mock-data/         → Public marketing projects / FAQ / testimonials
     validations/       → Zod schemas
     utils.ts           → cn() and helpers
-    constants.ts       → Sectors, payment statuses, roles
+    constants.ts       → Sectors, payment statuses, roles, payment instructions
+    profit.ts          → Active-plan profit calculation
 
-  actions/             → Server Actions by domain (auth, projects, payments, admin)
-  types/               → Shared + Supabase-generated types
-  middleware.ts        → Session refresh + (later) route protection
+  actions/             → Server Actions (payments primary; stubs for future domains)
+  types/               → Shared + database types
+  middleware.ts        → Session refresh + /dashboard + /admin protection
 ```
-
-Route groups `(public)`, `(auth)`, `(dashboard)`, and `(admin)` organize layouts without changing URLs.
 
 ### Key routes
 
 | Area | Paths |
 | --- | --- |
-| Public | `/`, `/ev`, `/agriculture`, `/projects`, `/projects/[id]`, `/about`, `/how-it-works`, `/faq`, `/contact` |
+| Public | `/`, `/ev`, `/agriculture`, `/projects`, `/projects/[id]`, `/about`, `/how-it-works`, `/impact`, `/faq`, `/contact`, `/terms`, `/privacy`, `/risk-disclosure` |
 | Auth | `/login`, `/signup`, `/forgot-password`, `/reset-password` |
-| User | `/dashboard`, `/dashboard/investments`, `/dashboard/payments/new`, `/dashboard/profile` |
-| Admin | `/admin`, `/admin/payments`, `/admin/projects`, `/admin/users` |
+| User | `/dashboard`, `/dashboard/billing`, `/dashboard/team` |
+| Admin | `/admin`, `/admin/approvals`, `/admin/support`, `/admin/audit-logs` |
+
+Legacy paths such as `/dashboard/investments` and `/admin/projects` redirect to the current surfaces.
 
 ## Scripts
 
@@ -92,10 +97,15 @@ Route groups `(public)`, `(auth)`, `(dashboard)`, and `(admin)` organize layouts
 | `npm run build` | Production build |
 | `npm run start` | Serve production build |
 | `npm run lint` | Run ESLint |
+| `npm run setup:supabase` | Migrate + create admin + configure auth |
+| `npm run db:migrate` | Apply SQL migrations |
+| `npm run db:create-admin` | Bootstrap admin (needs `ADMIN_EMAIL` + `ADMIN_PASSWORD`) |
+| `npm run db:configure-auth` | Confirm-email ON + redirect URLs |
 
 ## Notes
 
-- **Public marketing site** is implemented on mock data and is ready to soft-launch.
-- Auth, dashboard, admin, and Supabase schema are still stubs — see `AGENTS.md`.
-- shadcn forms use the `field` component with `react-hook-form` + `zod`.
-- Toasts use **sonner** (`components/ui/sonner.tsx`).
+- Public marketing projects still use mock data until project CRUD is backed by Supabase.
+- Auth, investor dashboard, billing, and admin approvals/support/audit are live against Supabase.
+- Legal pages are placeholders pending counsel-reviewed copy.
+- Contact form and newsletter are not backend-wired; use `hello@canadagreen.ca`.
+- Never commit `.env.local` or service-role keys.

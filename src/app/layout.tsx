@@ -41,6 +41,16 @@ export const metadata: Metadata = {
     description:
       "Crowdfunding platform for EV charging infrastructure and agriculture investment projects in Canada.",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Canada Green",
+    description:
+      "Crowdfunding platform for EV charging infrastructure and agriculture investment projects in Canada.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

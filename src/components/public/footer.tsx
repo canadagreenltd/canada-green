@@ -6,8 +6,6 @@ import {
   LinkedInIcon,
   XIcon,
 } from "@/components/shared/social-icons";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 const QUICK_LINKS = [
   { href: "/", label: "Home" },
@@ -103,19 +101,15 @@ export function Footer() {
             Newsletter
           </h3>
           <p className="mt-4 text-sm text-white/70">
-            Project updates and platform news — no spam.
+            Newsletter signup is coming soon. For updates, email{" "}
+            <a
+              href="mailto:hello@canadagreen.ca"
+              className="text-brand-300 transition hover:text-white"
+            >
+              hello@canadagreen.ca
+            </a>
+            .
           </p>
-          <form className="mt-4 flex flex-col gap-2 sm:flex-row" action="#">
-            <Input
-              type="email"
-              placeholder="Your email"
-              className="border-white/20 bg-white/10 text-white placeholder:text-white/40"
-              aria-label="Email for newsletter"
-            />
-            <Button type="button" variant="primary" size="sm">
-              Subscribe
-            </Button>
-          </form>
         </div>
       </div>
 

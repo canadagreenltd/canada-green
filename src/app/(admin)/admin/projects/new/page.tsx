@@ -1,9 +1,5 @@
-export default function NewAdminProjectPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-semibold">
-        New Project — coming soon
-      </h1>
-    </div>
-  );
+import { redirect } from "next/navigation";
+
+export default function AdminProjectsNewRedirect() {
+  redirect("/admin");
 }

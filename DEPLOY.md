@@ -1,7 +1,15 @@
 # Deploy Canada Green (Vercel + Hostinger domain)
 
-Manual checklist to put the **soft-launch marketing site** live.
-Auth, dashboard, and admin are still stubs — that is expected for this release.
+Manual checklist to put the **full app** live: marketing site, Supabase Auth, investor dashboard, and admin.
+
+**Prerequisites before production deploy**
+
+1. Supabase project created and `npm run setup:supabase` completed locally (migrations, admin user, auth URLs). See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md).
+2. Receipts storage bucket / policies applied (`supabase/storage-setup.md` / migration `003`).
+3. Strong unique `ADMIN_PASSWORD` (never committed). Rotate if an old shared default was ever used.
+4. Auth email delivery working (Supabase default or custom SMTP).
+
+Also see [PRODUCTION_READINESS.md](./PRODUCTION_READINESS.md) for the latest pre-launch findings.
 
 ---
 
@@ -12,6 +20,7 @@ You need:
 1. Code on GitHub: `https://github.com/canadagreenltd/canada-green`
 2. A [Vercel](https://vercel.com) account (GitHub connected)
 3. Your domain purchased at [Hostinger](https://www.hostinger.com) (DNS managed in hPanel)
+4. Supabase URL + anon key ready for Vercel env
 
 **Important:** Keep DNS at Hostinger. Point the website records to Vercel.  
 Do **not** point the domain at Hostinger website hosting for this app.  
@@ -42,17 +51,11 @@ In the import screen (or later: **Project → Settings → Environment Variables
 
 | Name | Value | Notes |
 |------|--------|--------|
-| `NEXT_PUBLIC_SITE_URL` | `https://YOURDOMAIN.com` | No trailing slash. Use your real domain (or the `*.vercel.app` URL temporarily until DNS is ready). |
+| `NEXT_PUBLIC_SITE_URL` | `https://YOURDOMAIN.com` | No trailing slash. Use real domain (or `*.vercel.app` temporarily until DNS is ready). |
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://xxxx.supabase.co` | Required for Auth / dashboard / admin |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon / publishable key | Required (browser-safe; RLS still applies) |
 
-**Supabase (optional for soft launch):**
-
-| Name | Value |
-|------|--------|
-| `NEXT_PUBLIC_SUPABASE_URL` | leave empty / skip for now |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | skip for now |
-| `SUPABASE_SERVICE_ROLE_KEY` | skip for now |
-
-Middleware already skips Supabase when those are missing. Add them later when Auth/DB are ready.
+**Do not** put `SUPABASE_SERVICE_ROLE_KEY` on Vercel unless you have a deliberate server-only use. Prefer running admin bootstrap scripts (`db:create-admin`, migrations) from a trusted local machine.
 
 Apply variables to **Production** and **Preview**.
 
@@ -61,12 +64,27 @@ Apply variables to **Production** and **Preview**.
 1. Click **Deploy**
 2. Wait for the build to finish (green)
 3. Open the `*.vercel.app` URL and smoke-test:
-   - `/` home
-   - `/projects` and a project detail page
-   - `/contact` (toast only — no backend yet)
-   - Login / Dashboard links may say “coming soon” — OK for soft launch
+   - `/` home, `/projects`, a project detail page
+   - `/login` / `/signup` (with referral code)
+   - After login: `/dashboard`, `/dashboard/billing`
+   - Admin account: `/admin`, Approvals, Support, Audit logs
+   - `/contact` (honest “email us” messaging — no backend delivery yet)
 
 Every push to `main` will auto-redeploy Production.
+
+### 4. Point Supabase Auth at production
+
+In Supabase → **Authentication → URL Configuration**:
+
+1. **Site URL** = your canonical `https://YOURDOMAIN.com` (or www)
+2. **Redirect URLs** include at least:
+   - `https://YOURDOMAIN.com/auth/callback`
+   - `https://www.YOURDOMAIN.com/auth/callback` (if you use www)
+   - `https://YOURPROJECT.vercel.app/auth/callback` (preview / interim)
+
+Or re-run `npm run db:configure-auth` locally after setting `NEXT_PUBLIC_SITE_URL` to the production URL in `.env.local`.
+
+Confirm email must stay **ON** for signup.
 
 ---
 
@@ -116,22 +134,32 @@ Once the custom domain works:
 1. Vercel → **Settings → Environment Variables**
 2. Set `NEXT_PUBLIC_SITE_URL` to your canonical URL, e.g. `https://www.YOURDOMAIN.com` (or apex — match the redirect you chose)
 3. **Redeploy** Production (Deployments → … → Redeploy) so metadata/sitemap use the real domain
+4. Update Supabase Auth Site URL / redirect allow list to match
 
 ---
 
-## Part C — Soft-launch checklist
+## Part C — Go-live checklist
 
-After go-live, quickly verify:
+After go-live, verify:
 
 - [ ] Home, EV, Agriculture, Projects, FAQ, Contact, About load
 - [ ] Images load (Unsplash)
 - [ ] Mobile menu works
 - [ ] HTTPS padlock shows
 - [ ] Both apex and www resolve (or one redirects to the other)
-- [ ] `/robots.txt` and `/sitemap.xml` load
-- [ ] Stub routes (`/login`, `/dashboard`, `/admin`) are acceptable “coming soon” pages
+- [ ] `/robots.txt` disallows `/admin`, `/dashboard`, auth routes
+- [ ] `/sitemap.xml` uses the production domain (not localhost)
+- [ ] Signup → confirm email → login → `/dashboard`
+- [ ] Forgot / reset password works
+- [ ] Billing: submit payment + receipt upload
+- [ ] Admin: approve / decline payment; support tickets; audit log entries appear
+- [ ] Admin password is unique and not stored in git
 
-**Not live yet (by design):** real auth, payments, admin CRUD, contact backend, full legal docs.
+**Still business-owned (not blocked by code, but important):**
+
+- Counsel-reviewed Terms / Privacy / Risk Disclosure
+- Contact form / newsletter / social profile backends
+- Custom SMTP for reliable auth email in production
 
 ---
 
@@ -144,7 +172,9 @@ After go-live, quickly verify:
 | Site still shows Hostinger parking | Old A records not removed, or DNS not propagated yet |
 | Email broke after DNS change | Restore Hostinger **MX** (and SPF **TXT**) records |
 | Wrong canonical links / OG URLs | Fix `NEXT_PUBLIC_SITE_URL` and redeploy |
-| 404 on refresh of a path | Unusual for Next on Vercel; confirm Framework is Next.js and Root Directory is correct |
+| Login / dashboard redirect loops | Confirm Supabase URL + anon key on Vercel; check Auth redirect URLs |
+| `?error=config` on login | Production is missing Supabase env vars |
+| Auth emails not arriving | Configure custom SMTP in Supabase; check spam; confirm email settings |
 
 Useful checks (on your PC):
 
@@ -155,12 +185,8 @@ nslookup www.YOURDOMAIN.com
 
 ---
 
-## After soft launch (later work)
+## Related docs
 
-1. Create Supabase project → add URL + anon key (+ service role server-only) on Vercel  
-2. Implement Auth + middleware protection  
-3. Build dashboard / admin + real Server Actions  
-4. Wire contact form to email/API  
-5. Replace legal stubs with counsel-reviewed copy  
-
-See `AGENTS.md` for codebase conventions while continuing development.
+- [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) — project + migrations + admin bootstrap
+- [PRODUCTION_READINESS.md](./PRODUCTION_READINESS.md) — pre-launch review notes
+- [AGENTS.md](./AGENTS.md) — codebase conventions

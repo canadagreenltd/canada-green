@@ -1,7 +1,5 @@
-export default function ProfilePage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-semibold">Profile — coming soon</h1>
-    </div>
-  );
+import { redirect } from "next/navigation";
+
+export default function DashboardProfileRedirect() {
+  redirect("/dashboard");
 }
