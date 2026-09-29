@@ -36,10 +36,10 @@ export default function ContactPage() {
               Online form delivery is not wired yet. Use the form to draft your
               message, then email{" "}
               <a
-                href="mailto:hello@canadagreen.ca"
+                href="mailto:hello@canadagreenltd.com"
                 className="font-medium text-brand-700 hover:underline"
               >
-                hello@canadagreen.ca
+                hello@canadagreenltd.com
               </a>
               .
             </p>
@@ -55,10 +55,10 @@ export default function ContactPage() {
                 <li className="flex items-center gap-3">
                   <Mail className="size-4 text-brand-500" />
                   <a
-                    href="mailto:hello@canadagreen.ca"
+                    href="mailto:hello@canadagreenltd.com"
                     className="hover:text-brand-700"
                   >
-                    hello@canadagreen.ca
+                    hello@canadagreenltd.com
                   </a>
                 </li>
                 <li className="flex items-start gap-3">

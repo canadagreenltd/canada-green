@@ -36,7 +36,7 @@ export function ContactForm() {
     await new Promise((r) => setTimeout(r, 400));
     toast.message("Form not connected yet", {
       description:
-        "Please email hello@canadagreen.ca directly. Online contact delivery is not enabled.",
+        "Please email hello@canadagreenltd.com directly. Online contact delivery is not enabled.",
     });
     reset();
   };

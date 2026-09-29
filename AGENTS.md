@@ -20,7 +20,7 @@ Deploy target: **Vercel**.
 | Payments + receipts Server Actions | **Live** (`src/actions/payments.ts`) |
 | Admin project CRUD / DB-backed projects | **Not built** (legacy routes redirect) |
 | Route protection / roles | **Live** in middleware (`/dashboard`, `/admin`) |
-| Contact / newsletter / socials | Frontend-only / coming soon — email `hello@canadagreen.ca` |
+| Contact / newsletter / socials | Frontend-only / coming soon — email `hello@canadagreenltd.com` |
 
 **Mental model:** public marketing stays mock-backed until project CRUD ships; Auth, billing, and admin money flows are production features. Do not invent legal text or social URLs.
 

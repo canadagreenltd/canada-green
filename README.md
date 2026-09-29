@@ -107,5 +107,5 @@ Legacy paths such as `/dashboard/investments` and `/admin/projects` redirect to 
 - Public marketing projects still use mock data until project CRUD is backed by Supabase.
 - Auth, investor dashboard, billing, and admin approvals/support/audit are live against Supabase.
 - Legal pages are placeholders pending counsel-reviewed copy.
-- Contact form and newsletter are not backend-wired; use `hello@canadagreen.ca`.
+- Contact form and newsletter are not backend-wired; use `hello@canadagreenltd.com`.
 - Never commit `.env.local` or service-role keys.

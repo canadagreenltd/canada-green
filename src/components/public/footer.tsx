@@ -88,10 +88,10 @@ export function Footer() {
           </ul>
           <p className="mt-6 text-sm text-white/70">
             <a
-              href="mailto:hello@canadagreen.ca"
+              href="mailto:hello@canadagreenltd.com"
               className="transition hover:text-brand-300"
             >
-              hello@canadagreen.ca
+              hello@canadagreenltd.com
             </a>
           </p>
         </div>
@@ -103,10 +103,10 @@ export function Footer() {
           <p className="mt-4 text-sm text-white/70">
             Newsletter signup is coming soon. For updates, email{" "}
             <a
-              href="mailto:hello@canadagreen.ca"
+              href="mailto:hello@canadagreenltd.com"
               className="text-brand-300 transition hover:text-white"
             >
-              hello@canadagreen.ca
+              hello@canadagreenltd.com
             </a>
             .
           </p>

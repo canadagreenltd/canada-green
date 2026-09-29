@@ -18,10 +18,10 @@ export default function RiskDisclosurePage() {
           Full Risk Disclosure will be published prior to public launch. Contact
           us with any questions in the meantime at{" "}
           <a
-            href="mailto:hello@canadagreen.ca"
+            href="mailto:hello@canadagreenltd.com"
             className="font-medium text-brand-700 underline"
           >
-            hello@canadagreen.ca
+            hello@canadagreenltd.com
           </a>{" "}
           or via our{" "}
           <Link href="/contact" className="font-medium text-brand-700 underline">

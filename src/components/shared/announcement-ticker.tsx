@@ -40,7 +40,7 @@ export function AnnouncementTicker({ className }: AnnouncementTickerProps) {
         role="status"
         aria-live="polite"
         className={cn(
-          "flex h-10 items-center justify-center overflow-hidden bg-accent-red px-4",
+          "flex h-10 items-center justify-center overflow-hidden bg-brand-950 px-4",
           className
         )}
       >
@@ -57,7 +57,7 @@ export function AnnouncementTicker({ className }: AnnouncementTickerProps) {
       aria-live="polite"
       aria-label={MESSAGE}
       className={cn(
-        "group/ticker flex h-10 items-center overflow-hidden bg-accent-red",
+        "group/ticker flex h-10 items-center overflow-hidden bg-brand-950",
         className
       )}
     >
