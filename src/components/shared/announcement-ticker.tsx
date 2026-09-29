@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const MESSAGE =
-  "Want to Invest and Grow in Canada  🇨🇦  Something Big is Coming Soon  🇨🇦  Stay Tuned";
+  "A lifetime opportunity for medium and large investors — Start investing in Canada's green future";
 
 const SEGMENT = (
   <>

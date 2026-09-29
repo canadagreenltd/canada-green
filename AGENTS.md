@@ -15,8 +15,8 @@ Deploy target: **Vercel**.
 | Public marketing site | **Done** — mock projects / FAQ / testimonials |
 | Legal stubs (`/terms`, `/privacy`, `/risk-disclosure`) | Placeholder notices only — counsel copy required |
 | Auth (login / signup / forgot / reset) | **Live** via Supabase Auth + `/auth/callback` |
-| User dashboard (overview, billing, team) | **Live** against Supabase |
-| Admin (overview, approvals, support, audit logs) | **Live** against Supabase |
+| User dashboard (overview, billing, team + ranks) | **Live** against Supabase |
+| Admin (overview, approvals, commissions, support, audit) | **Live** against Supabase |
 | Payments + receipts Server Actions | **Live** (`src/actions/payments.ts`) |
 | Admin project CRUD / DB-backed projects | **Not built** (legacy routes redirect) |
 | Route protection / roles | **Live** in middleware (`/dashboard`, `/admin`) |
@@ -44,7 +44,7 @@ src/
     (dashboard)/  → Investor dashboard — live
     (admin)/      → Admin panel — live
     api/          → Prefer Server Actions; keep API minimal
-  actions/        → Domain Server Actions (payments live; auth/admin/projects stubs unused)
+  actions/        → Domain Server Actions (`payments.ts`)
   components/
     ui/           → shadcn primitives
     public/       → Marketing components
@@ -53,12 +53,13 @@ src/
     shared/       → Logo, ticker, theme, badges, progress, etc.
     auth/         → Auth forms + logout
   lib/
-    supabase/     → client, server, middleware helpers
+    supabase/     → client, server, middleware helpers (incl. getSiteUrl)
     mock-data/    → projects, faq, testimonials (public marketing)
     validations/  → Zod schemas
     constants.ts  → SECTORS, PAYMENT_STATUSES, ROLES, payment instructions
     profit.ts     → Active-plan profit (Toronto weekdays)
-  types/          → Shared types; database.ts placeholder until regenerated
+    team-rank.ts  → Automatic ranks from team size
+  types/          → Shared + database types
   middleware.ts   → Session refresh + /dashboard + /admin protection
 ```
 
@@ -71,7 +72,7 @@ Route groups organize layouts; URLs stay flat (`/`, `/login`, `/dashboard`, `/ad
 | Public | `/`, `/ev`, `/agriculture`, `/projects`, `/projects/[id]`, `/about`, `/how-it-works`, `/impact`, `/faq`, `/contact`, `/terms`, `/privacy`, `/risk-disclosure` |
 | Auth | `/login`, `/signup`, `/forgot-password`, `/reset-password` |
 | User | `/dashboard`, `/dashboard/billing`, `/dashboard/team` |
-| Admin | `/admin`, `/admin/approvals`, `/admin/support`, `/admin/audit-logs` |
+| Admin | `/admin`, `/admin/approvals`, `/admin/rewards` (Commissions), `/admin/support`, `/admin/audit-logs` |
 
 ## Conventions (follow these)
 
@@ -153,6 +154,8 @@ Middleware no-ops Supabase session refresh if URL/anon key are missing so local 
 - Signups always create `profiles.role = 'user'` (admin is bootstrap-only via `db:create-admin`)
 - Confirm email + password reset use `/auth/callback` (enable Confirm email in Supabase)
 - Payments + receipt storage: migration `003_payments_storage.sql` (`payment_submissions`, `support_tickets`, `receipts` bucket)
+- Team referral commissions: migration `007_referral_commissions.sql` (one-time 5%/1% on approve; Team tab tree depth 10)
+- Admin commissions view: `/admin/rewards` (commission totals; ranks are automatic on user dashboard)
 - One-command setup: **`npm run setup:supabase`** (see `SUPABASE_SETUP.md`)
 - Scripts: `scripts/run-migrations.mjs`, `create-admin.mjs`, `configure-auth.mjs`
 - Optional extra buckets: **`supabase/storage-setup.md`**

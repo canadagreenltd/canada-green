@@ -4,6 +4,16 @@
  * Service role is never used here — keep it server-only elsewhere.
  */
 
+/** Canonical production site URL when NEXT_PUBLIC_SITE_URL is unset. */
+export const PRODUCTION_SITE_URL = "https://canadagreen.ca";
+
+function isProductionRuntime(): boolean {
+  return (
+    process.env.VERCEL_ENV === "production" ||
+    process.env.NODE_ENV === "production"
+  );
+}
+
 export function isSupabaseConfigured(): boolean {
   return Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
@@ -31,10 +41,13 @@ export function getSupabaseAnonKey(): string {
   return key;
 }
 
-/** Site origin used for auth email redirects (no trailing slash). */
+/**
+ * Site origin for auth redirects, OG metadata, robots, sitemap (no trailing slash).
+ * Prefer NEXT_PUBLIC_SITE_URL. In production never fall back to localhost.
+ */
 export function getSiteUrl(): string {
-  const url =
-    process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "") ||
-    "http://localhost:3000";
-  return url;
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
+  if (configured) return configured;
+  if (isProductionRuntime()) return PRODUCTION_SITE_URL;
+  return "http://localhost:3000";
 }

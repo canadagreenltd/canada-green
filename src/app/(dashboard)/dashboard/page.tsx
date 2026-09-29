@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CopyReferralCode } from "@/components/dashboard/copy-referral-code";
 import { PlanStatusBadge } from "@/components/dashboard/plan-status-badge";
+import { TeamRankCard } from "@/components/dashboard/team-rank-card";
 import { StatCard } from "@/components/admin/stat-card";
 import { PLAN_RENEWAL_NOTICE_DAYS } from "@/lib/constants";
 import { formatUserCad } from "@/lib/format-money";
@@ -62,6 +63,12 @@ export default async function DashboardPage() {
         .select("amount_cad, status, starts_at, ends_at")
         .eq("user_id", user.id)
     : { data: null };
+
+  const { data: teamRows } = user
+    ? await supabase.rpc("get_my_team_profiles")
+    : { data: null };
+
+  const teamSize = (teamRows ?? []).length;
 
   const paymentRows = payments ?? [];
   const activePlans = paymentRows
@@ -133,6 +140,12 @@ export default async function DashboardPage() {
         />
       </div>
 
+      <div className="rounded-2xl border border-brand-300/25 bg-moss-100/60 px-4 py-3 text-sm text-brand-900">
+        Withdrawal of profit will be on the 1st day of every month.
+      </div>
+
+      <TeamRankCard teamSize={teamSize} />
+
       <div className="surface-card p-5 sm:p-6">
         <h2 className="font-heading text-lg font-semibold text-brand-900">
           Profile
@@ -166,7 +179,7 @@ export default async function DashboardPage() {
             <p className="mt-1 text-sm text-neutral-600">
               Share{" "}
               <code className="text-xs">?ref={profile.referral_code}</code> so
-              others join your team.
+              others join your team and help you climb ranks.
             </p>
             <div className="mt-3">
               <CopyReferralCode code={profile.referral_code} />

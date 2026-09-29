@@ -10,11 +10,13 @@ const accents = [
 export function StatCard({
   label,
   value,
+  hint,
   className,
   index = 0,
 }: {
   label: string;
   value: string;
+  hint?: string;
   className?: string;
   index?: number;
 }) {
@@ -41,6 +43,9 @@ export function StatCard({
         <p className="mt-2 font-heading text-xl font-bold tracking-tight text-brand-900 sm:text-2xl">
           {value}
         </p>
+        {hint ? (
+          <p className="mt-1.5 text-xs leading-snug text-neutral-500">{hint}</p>
+        ) : null}
       </div>
     </div>
   );

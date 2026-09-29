@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   ClipboardList,
+  Gift,
   LayoutDashboard,
   LifeBuoy,
   ShieldCheck,
@@ -13,6 +14,7 @@ import { cn } from "@/lib/utils";
 const links = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/approvals", label: "Approvals", icon: ShieldCheck },
+  { href: "/admin/rewards", label: "Commissions", icon: Gift },
   { href: "/admin/support", label: "Support", icon: LifeBuoy },
   { href: "/admin/audit-logs", label: "Audit logs", icon: ClipboardList },
 ];

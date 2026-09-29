@@ -1,12 +1,8 @@
 import type { MetadataRoute } from "next";
+import { getSiteUrl } from "@/lib/supabase/env";
 
 export default function robots(): MetadataRoute.Robots {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
-  const isProd =
-    process.env.VERCEL_ENV === "production" ||
-    process.env.NODE_ENV === "production";
-  const siteUrl =
-    configured || (isProd ? "https://canadagreen.ca" : "http://localhost:3000");
+  const siteUrl = getSiteUrl();
 
   return {
     rules: {

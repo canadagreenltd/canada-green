@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Caveat, Inter, Sora } from "next/font/google";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { getSiteUrl } from "@/lib/supabase/env";
 import "./globals.css";
 
 const sora = Sora({
@@ -21,9 +22,7 @@ const caveat = Caveat({
   weight: ["500", "600", "700"],
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "http://localhost:3000";
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

@@ -208,6 +208,7 @@ export async function reviewPaymentSubmission(input: {
   revalidatePath("/admin");
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/billing");
+  revalidatePath("/dashboard/team");
   return { ok: true };
 }
 

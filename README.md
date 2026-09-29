@@ -73,7 +73,7 @@ src/
     constants.ts       → Sectors, payment statuses, roles, payment instructions
     profit.ts          → Active-plan profit calculation
 
-  actions/             → Server Actions (payments primary; stubs for future domains)
+  actions/             → Server Actions (`payments.ts`; rewards removed — ranks are automatic)
   types/               → Shared + database types
   middleware.ts        → Session refresh + /dashboard + /admin protection
 ```
@@ -85,7 +85,7 @@ src/
 | Public | `/`, `/ev`, `/agriculture`, `/projects`, `/projects/[id]`, `/about`, `/how-it-works`, `/impact`, `/faq`, `/contact`, `/terms`, `/privacy`, `/risk-disclosure` |
 | Auth | `/login`, `/signup`, `/forgot-password`, `/reset-password` |
 | User | `/dashboard`, `/dashboard/billing`, `/dashboard/team` |
-| Admin | `/admin`, `/admin/approvals`, `/admin/support`, `/admin/audit-logs` |
+| Admin | `/admin`, `/admin/approvals`, `/admin/rewards` (Commissions), `/admin/support`, `/admin/audit-logs` |
 
 Legacy paths such as `/dashboard/investments` and `/admin/projects` redirect to the current surfaces.
 

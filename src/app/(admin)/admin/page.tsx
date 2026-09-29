@@ -9,7 +9,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { UserStatus } from "@/lib/dashboard-types";
-import { formatAdminCad, formatAdminDate } from "@/lib/format-money";
+import { formatAdminCad, formatAdminDate, formatUserCad } from "@/lib/format-money";
+import { todaysProfit, totalProfit } from "@/lib/profit";
 import { createClient } from "@/lib/supabase/server";
 import type { PaymentStatus } from "@/types/database";
 
@@ -19,18 +20,29 @@ function userStatusFromPayments(statuses: PaymentStatus[]): UserStatus {
   return "inactive";
 }
 
+type PaymentRow = {
+  user_id: string;
+  amount_cad: number;
+  status: PaymentStatus;
+  starts_at: string | null;
+  ends_at: string | null;
+};
+
 export default async function AdminOverviewPage() {
   const supabase = await createClient();
+  const now = new Date();
 
   const [{ data: profiles }, { data: payments }] = await Promise.all([
     supabase
       .from("profiles")
       .select("id, full_name, email, role, created_at")
       .order("created_at", { ascending: false }),
-    supabase.from("payment_submissions").select("user_id, amount_cad, status"),
+    supabase
+      .from("payment_submissions")
+      .select("user_id, amount_cad, status, starts_at, ends_at"),
   ]);
 
-  const paymentRows = payments ?? [];
+  const paymentRows = (payments ?? []) as PaymentRow[];
   const investorCount = (profiles ?? []).filter((p) => p.role === "user").length;
   const totalInvestment = paymentRows
     .filter((p) => p.status === "active")
@@ -39,13 +51,43 @@ export default async function AdminOverviewPage() {
   const declinedCount = paymentRows.filter((p) => p.status === "declined").length;
 
   const statusesByUser = new Map<string, PaymentStatus[]>();
+  const plansByUser = new Map<
+    string,
+    Array<{ amount: number; startsAt: string | null; endsAt: string | null }>
+  >();
+
   for (const p of paymentRows) {
     const list = statusesByUser.get(p.user_id) ?? [];
     list.push(p.status);
     statusesByUser.set(p.user_id, list);
+
+    if (p.status === "active") {
+      const plans = plansByUser.get(p.user_id) ?? [];
+      plans.push({
+        amount: Number(p.amount_cad),
+        startsAt: p.starts_at,
+        endsAt: p.ends_at,
+      });
+      plansByUser.set(p.user_id, plans);
+    }
   }
 
   const users = profiles ?? [];
+
+  let platformDailyProfit = 0;
+  let platformTotalProfit = 0;
+  const profitByUser = new Map<string, { daily: number; total: number }>();
+
+  for (const user of users) {
+    const plans = plansByUser.get(user.id) ?? [];
+    const daily = todaysProfit(plans, now);
+    const total = totalProfit(plans, now);
+    profitByUser.set(user.id, { daily, total });
+    if (user.role !== "admin") {
+      platformDailyProfit += daily;
+      platformTotalProfit += total;
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -61,7 +103,7 @@ export default async function AdminOverviewPage() {
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3 2xl:grid-cols-6">
         <StatCard
           index={0}
           label="Investors"
@@ -78,6 +120,18 @@ export default async function AdminOverviewPage() {
           value={String(pendingCount)}
         />
         <StatCard index={3} label="Declined" value={String(declinedCount)} />
+        <StatCard
+          index={4}
+          label="All users — today's profit"
+          value={formatUserCad(platformDailyProfit)}
+          hint="Sum of every investor's weekday profit today"
+        />
+        <StatCard
+          index={5}
+          label="All users — total profit"
+          value={formatUserCad(platformTotalProfit)}
+          hint="Sum of all-time accrued profit across investors"
+        />
       </div>
 
       <div>
@@ -97,6 +151,8 @@ export default async function AdminOverviewPage() {
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Daily profit</TableHead>
+              <TableHead>Total profit</TableHead>
               <TableHead>Joined</TableHead>
             </TableRow>
           </TableHeader>
@@ -104,7 +160,7 @@ export default async function AdminOverviewPage() {
             {users.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={7}
                   className="py-8 text-center text-neutral-600"
                 >
                   No users yet.
@@ -118,6 +174,10 @@ export default async function AdminOverviewPage() {
                     : userStatusFromPayments(
                         statusesByUser.get(user.id) ?? []
                       );
+                const profit = profitByUser.get(user.id) ?? {
+                  daily: 0,
+                  total: 0,
+                };
                 return (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium text-brand-900">
@@ -127,6 +187,12 @@ export default async function AdminOverviewPage() {
                     <TableCell className="capitalize">{user.role}</TableCell>
                     <TableCell>
                       <UserStatusPill status={status} />
+                    </TableCell>
+                    <TableCell className="tabular-nums text-brand-900">
+                      {formatUserCad(profit.daily)}
+                    </TableCell>
+                    <TableCell className="tabular-nums text-brand-900">
+                      {formatUserCad(profit.total)}
                     </TableCell>
                     <TableCell className="text-neutral-600">
                       {formatAdminDate(user.created_at)}

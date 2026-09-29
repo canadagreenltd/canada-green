@@ -4,6 +4,8 @@ export type UserStatus = "active" | "inactive" | "pending";
 export type TeamNode = {
   id: string;
   name: string;
+  /** Depth from the logged-in user: 0 = self, 1 = direct, 2+ = indirect */
+  depth: number;
   children: TeamNode[];
 };
 

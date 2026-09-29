@@ -172,6 +172,103 @@ export type Database = {
           },
         ];
       };
+      referral_commissions: {
+        Row: {
+          id: string;
+          beneficiary_id: string;
+          source_user_id: string;
+          payment_submission_id: string;
+          level: number;
+          rate: number;
+          amount_cad: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          beneficiary_id: string;
+          source_user_id: string;
+          payment_submission_id: string;
+          level: number;
+          rate: number;
+          amount_cad: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          beneficiary_id?: string;
+          source_user_id?: string;
+          payment_submission_id?: string;
+          level?: number;
+          rate?: number;
+          amount_cad?: number;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "referral_commissions_beneficiary_id_fkey";
+            columns: ["beneficiary_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "referral_commissions_source_user_id_fkey";
+            columns: ["source_user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "referral_commissions_payment_submission_id_fkey";
+            columns: ["payment_submission_id"];
+            isOneToOne: false;
+            referencedRelation: "payment_submissions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      user_rewards: {
+        Row: {
+          id: string;
+          user_id: string;
+          tier: string;
+          note: string;
+          granted_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          tier: string;
+          note?: string;
+          granted_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          tier?: string;
+          note?: string;
+          granted_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_rewards_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_rewards_granted_by_fkey";
+            columns: ["granted_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -183,7 +280,12 @@ export type Database = {
           id: string;
           full_name: string;
           referred_by: string | null;
+          depth: number;
         }[];
+      };
+      distribute_referral_commissions: {
+        Args: { p_payment_id: string };
+        Returns: undefined;
       };
       ensure_my_profile: {
         Args: Record<string, never>;

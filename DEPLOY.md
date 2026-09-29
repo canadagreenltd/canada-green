@@ -51,13 +51,15 @@ In the import screen (or later: **Project → Settings → Environment Variables
 
 | Name | Value | Notes |
 |------|--------|--------|
-| `NEXT_PUBLIC_SITE_URL` | `https://YOURDOMAIN.com` | No trailing slash. Use real domain (or `*.vercel.app` temporarily until DNS is ready). |
+| `NEXT_PUBLIC_SITE_URL` | `https://canadagreen.ca` | No trailing slash. Prefer apex **or** www to match your Vercel redirect. Temporary: `https://YOURPROJECT.vercel.app` until DNS is ready. |
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://xxxx.supabase.co` | Required for Auth / dashboard / admin |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon / publishable key | Required (browser-safe; RLS still applies) |
 
 **Do not** put `SUPABASE_SERVICE_ROLE_KEY` on Vercel unless you have a deliberate server-only use. Prefer running admin bootstrap scripts (`db:create-admin`, migrations) from a trusted local machine.
 
-Apply variables to **Production** and **Preview**.
+Apply variables to **Production**. For **Preview**, either use the same Production values carefully, or set Preview `NEXT_PUBLIC_SITE_URL` to the preview URL and add that URL to Supabase redirect allow list—otherwise auth emails from Preview builds will point at the wrong host.
+
+**Important:** `NEXT_PUBLIC_*` values are baked in at **build time**. After any change, **Redeploy** (Deployments → … → Redeploy). Saving env alone is not enough.
 
 ### 3. Deploy
 
@@ -65,9 +67,9 @@ Apply variables to **Production** and **Preview**.
 2. Wait for the build to finish (green)
 3. Open the `*.vercel.app` URL and smoke-test:
    - `/` home, `/projects`, a project detail page
-   - `/login` / `/signup` (with referral code)
-   - After login: `/dashboard`, `/dashboard/billing`
-   - Admin account: `/admin`, Approvals, Support, Audit logs
+   - `/login` / `/signup?ref=ADMIN_REFERRAL_CODE`
+   - After login: `/dashboard` (ranks), `/dashboard/billing`, `/dashboard/team`
+   - Admin: `/admin`, Approvals, **Commissions** (`/admin/rewards`), Support, Audit logs
    - `/contact` (honest “email us” messaging — no backend delivery yet)
 
 Every push to `main` will auto-redeploy Production.
@@ -149,17 +151,21 @@ After go-live, verify:
 - [ ] Both apex and www resolve (or one redirects to the other)
 - [ ] `/robots.txt` disallows `/admin`, `/dashboard`, auth routes
 - [ ] `/sitemap.xml` uses the production domain (not localhost)
-- [ ] Signup → confirm email → login → `/dashboard`
+- [ ] Signup → confirm email → login → `/dashboard` (rank card visible)
 - [ ] Forgot / reset password works
+- [ ] Team tab tree + referral note; invite link works
 - [ ] Billing: submit payment + receipt upload
 - [ ] Admin: approve / decline payment; support tickets; audit log entries appear
+- [ ] Admin → Commissions shows referral totals
 - [ ] Admin password is unique and not stored in git
+- [ ] After any `NEXT_PUBLIC_*` change, Production was **redeployed**
 
 **Still business-owned (not blocked by code, but important):**
 
 - Counsel-reviewed Terms / Privacy / Risk Disclosure
 - Contact form / newsletter / social profile backends
 - Custom SMTP for reliable auth email in production
+- Soften or replace mock testimonials/projects if you do not want them presented as live catalog
 
 ---
 
